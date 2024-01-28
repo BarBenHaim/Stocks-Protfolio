@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Personal Stocks Portfolio</title>
+  </head>
+  <body>
+    <header>
+      <h1>Stock Portfolio Manager</h1>
+    </header>
+    <main>
+      <div class="portfolio">
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Quantity</th>
+              <th>Total Worth</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="addbtncont">
+          <input
+            type="text"
+            id="stockSymbol"
+            placeholder="Enter stock symbol"
+          />
+          <input
+            type="text"
+            id="stockQuantity"
+            placeholder="Enter wanted quantity"
+          />
+          <div id="resultArea"></div>
+          <button class="addbtn">Buy</button>
+        </div>
+        <div class="deletebtncont">
+          <input
+            type="text"
+            id="stockSymbolsell"
+            placeholder="Enter stock symbol for sell"
+          />
+          <input
+            type="text"
+            id="stockQuantitysell"
+            placeholder="Quantity for sell"
+          />
+          <button class="deletebtn">Sell</button>
+        </div>
+        <div class="totalContainer">
+          Equity
+          <div id="totalProt">0</div>
+        </div>
+      </div>
+    </main>
+    <script src="index.js"></script>
+  </body>
+</html>
