@@ -5,10 +5,11 @@ body {
   color: #333;
   margin: 0;
   padding: 0;
+  line-height: 1.6;
 }
 
 header {
-  background-color: #007bff;
+  background: linear-gradient(180deg, #af0303, #000000);
   color: #fff;
   text-align: center;
   padding: 1rem 0;
@@ -17,16 +18,7 @@ header {
 
 h1 {
   margin: 0;
-  animation: fadeIn 1s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  font-size: 2rem;
 }
 
 main {
@@ -40,11 +32,13 @@ main {
   background: white;
   padding: 20px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-  transition: box-shadow 0.3s ease-in-out;
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease;
+  border-radius: 8px;
 }
 
 .portfolio:hover {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+  transform: scale(1.02);
 }
 
 /* Table Styles */
@@ -62,7 +56,7 @@ td {
 }
 
 th {
-  background-color: #007bff;
+  background: linear-gradient(180deg, #af0303, #000000);
   color: white;
 }
 
@@ -81,7 +75,7 @@ input[type="text"] {
   border: 1px solid #ddd;
   border-radius: 4px;
   width: calc(100% - 22px);
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 input[type="text"]:focus {
@@ -98,11 +92,13 @@ button {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
+  font-weight: bold;
 }
 
 button:hover {
   background-color: #218838;
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .addbtncont,
@@ -145,13 +141,14 @@ button:hover {
   background-color: #f8f8f8;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
   color: #333333;
 }
 
 .result-item:hover {
   background-color: #e0e0e0;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
 }
 
 /* Total Portfolio Value */
@@ -163,6 +160,7 @@ button:hover {
   padding: 10px;
   border-radius: 4px;
   margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 #totalProt {
@@ -170,3 +168,59 @@ button:hover {
   min-width: 100px;
   text-align: right;
 }
+
+/* Navbar Styles */
+.navbar {
+  width: 20%;
+  background-color: rgb(
+    255,
+    255,
+    255
+  ); /* Solid black background for contrast */
+  padding: 10px 0; /* Vertical padding */
+  box-shadow: 0 2px 5px rgb(0, 0, 0); /* Subtle shadow for depth */
+}
+
+.navbar ul {
+  list-style: none; /* Remove default list styling */
+  padding: 0; /* Remove default padding */
+  margin: 0; /* Remove default margin */
+  display: flex; /* Use flexbox for better alignment */
+  align-items: center; /* Center items vertically */
+  justify-content: flex-start; /* Align items to the left */
+}
+
+.navbar ul li {
+  margin-right: 30px; /* Increase space between items for better readability */
+}
+
+.navbar ul li:last-child {
+  margin-right: 0; /* Remove margin for the last item */
+}
+
+.navbar a {
+  text-decoration: none; /* Remove underline from links */
+  color: red; /* Vibrant red for emphasis */
+  font-size: 1.1em; /* Slightly larger font size */
+  font-weight: bold; /* Bold font for prominence */
+  padding: 5px 10px; /* Padding for a larger clickable area */
+  border-radius: 4px; /* Rounded corners for a modern look */
+  transition: all 0.3s ease-in-out; /* Smooth transition for hover effects */
+}
+
+.navbar a:hover {
+  color: #1d1a1a; /* White color on hover for contrast */
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .navbar ul {
+    justify-content: center; /* Center items on smaller screens */
+  }
+
+  .navbar ul li {
+    margin-right: 15px; /* Reduce margin on smaller screens */
+  }
+}
+
+/* Additional styling for small screens or other elements can be added here */

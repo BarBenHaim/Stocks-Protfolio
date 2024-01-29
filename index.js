@@ -6,18 +6,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const stockQuantityInput = document.getElementById("stockQuantity");
   const resultArea = document.getElementById("resultArea");
   const totalProt = document.getElementById("totalProt");
-  const financialModelingPrepApiKey = "f763dc4a01703e3ae743d829dde8c122"; // Replace with your API Key
+  const financialModelingPrepApiKey = "f763dc4a01703e3ae743d829dde8c122";
   let allStockSymbols = [];
   let totalPortfolioValue = 0;
 
-  // Fetch all stock symbols once and store them
   function fetchAllStockSymbols() {
     const url = `https://financialmodelingprep.com/api/v3/stock/list?apikey=${financialModelingPrepApiKey}`;
     fetch(url)
       .then((response) => response.json())
-      .then((data) => {
-        allStockSymbols = data.map((stock) => stock.symbol);
-      })
+      .then((data) => (allStockSymbols = data.map((stock) => stock.symbol)))
       .catch((error) => console.error("Error fetching stock symbols:", error));
   }
 
@@ -35,8 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function searchStocks(query) {
-    resultArea.innerHTML = ""; // Clear previous results
-    const maxResults = 50; // Maximum number of results to display
+    resultArea.innerHTML = "";
+    const maxResults = 50;
     const filteredSymbols = allStockSymbols
       .filter((symbol) => symbol.toLowerCase().startsWith(query.toLowerCase()))
       .slice(0, maxResults);
@@ -45,9 +42,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const resultItem = document.createElement("button");
       resultItem.textContent = symbol;
       resultItem.classList.add("result-item");
-      resultItem.onclick = function () {
+      resultItem.onclick = () => {
         stockSymbolInput.value = symbol;
-        resultArea.innerHTML = ""; // Clear results after selection
+        resultArea.innerHTML = "";
       };
       resultArea.appendChild(resultItem);
     });
@@ -57,54 +54,91 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Debouncing function
   function debounce(func, timeout = 300) {
     let timer;
     return (...args) => {
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        func.apply(this, args);
-      }, timeout);
+      timer = setTimeout(() => func.apply(this, args), timeout);
     };
   }
 
-  // Debounced input event listener
   stockSymbolInput.addEventListener(
     "input",
-    debounce(function (event) {
+    debounce((event) => {
       const query = event.target.value;
-      if (query.length > 0) {
-        searchStocks(query);
-      } else {
-        resultArea.innerHTML = "";
-      }
+      if (query.length > 0) searchStocks(query);
+      else resultArea.innerHTML = "";
     })
   );
 
-  addButton.addEventListener("click", function () {
-    const symbol = stockSymbolInput.value.toUpperCase();
-    const quantity = stockQuantityInput.value;
+  function formatQuantity(quantity) {
+    return quantity % 1 === 0 ? quantity.toString() : quantity.toFixed(2);
+  }
 
-    if (symbol && quantity) {
+  function formatDate(date) {
+    return date.toLocaleString();
+  }
+
+  function recordAction(action, symbol, quantity, totalValue) {
+    const history = JSON.parse(localStorage.getItem("actionHistory")) || [];
+    history.push({
+      date: formatDate(new Date()),
+      action,
+      symbol,
+      quantity: formatQuantity(quantity),
+      totalValue: totalValue.toFixed(2),
+    });
+    localStorage.setItem("actionHistory", JSON.stringify(history));
+  }
+
+  function findRowBySymbol(symbol) {
+    return Array.from(tableBody.querySelectorAll("tr")).find(
+      (row) => row.cells[0].textContent === symbol
+    );
+  }
+
+  addButton.addEventListener("click", () => {
+    const symbol = stockSymbolInput.value.toUpperCase();
+    const quantity = parseFloat(stockQuantityInput.value);
+
+    if (symbol && !isNaN(quantity) && quantity > 0) {
       getStockPrice(symbol)
         .then((price) => {
-          const totalValue = parseFloat(quantity) * price;
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `<td>${symbol}</td><td>${quantity}</td><td>$${totalValue.toFixed(
-            2
-          )}</td>`;
-          newRow.setAttribute("data-value", totalValue.toFixed(2)); // Store the value in the row
-          tableBody.appendChild(newRow);
+          const totalValue = quantity * price;
+          const existingRow = findRowBySymbol(symbol);
+
+          if (existingRow) {
+            const currentQuantity = parseFloat(
+              existingRow.cells[1].textContent
+            );
+            const newQuantity = currentQuantity + quantity;
+            const newTotalValue = newQuantity * price;
+
+            existingRow.cells[1].textContent = formatQuantity(newQuantity);
+            existingRow.cells[2].textContent = `$${newTotalValue.toFixed(2)}`;
+            existingRow.setAttribute("data-value", newTotalValue.toFixed(2));
+
+            totalPortfolioValue += totalValue;
+          } else {
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `<td>${symbol}</td><td>${formatQuantity(
+              quantity
+            )}</td><td>$${totalValue.toFixed(2)}</td>`;
+            newRow.setAttribute("data-value", totalValue.toFixed(2));
+            tableBody.appendChild(newRow);
+
+            totalPortfolioValue += totalValue;
+          }
+
           stockSymbolInput.value = "";
           stockQuantityInput.value = "";
-
-          // Update total portfolio value
-          totalPortfolioValue += totalValue;
           totalProt.textContent = `${totalPortfolioValue.toFixed(2)}$`;
+
+          recordAction("Buy", symbol, quantity, totalValue);
         })
         .catch((error) => alert(error.message));
     } else {
-      alert("Please enter both symbol and quantity.");
+      alert("Please enter a valid symbol and quantity.");
     }
   });
 
@@ -112,53 +146,91 @@ document.addEventListener("DOMContentLoaded", function () {
     const sellSymbol = document
       .getElementById("stockSymbolsell")
       .value.toUpperCase();
-    const sellQuantity = parseInt(
-      document.getElementById("stockQuantitysell").value,
-      10
+    const sellQuantity = parseFloat(
+      document.getElementById("stockQuantitysell").value
     );
 
-    if (!sellSymbol || isNaN(sellQuantity) || sellQuantity <= 0) {
-      alert("Please enter a valid symbol and quantity for selling.");
-      return;
-    }
+    if (sellSymbol && !isNaN(sellQuantity) && sellQuantity > 0) {
+      const matchingRow = findRowBySymbol(sellSymbol);
 
-    const rows = Array.from(tableBody.querySelectorAll("tr"));
-    const matchingRow = rows.find(
-      (row) => row.cells[0].textContent === sellSymbol
-    );
-
-    if (matchingRow) {
-      const currentQuantity = parseInt(matchingRow.cells[1].textContent, 10);
-      if (sellQuantity >= currentQuantity) {
-        // If selling quantity is greater than or equal to current, remove the row
-        tableBody.removeChild(matchingRow);
-        totalPortfolioValue -= parseFloat(
-          matchingRow.getAttribute("data-value")
-        );
-      } else {
-        // Update the quantity and total value in the row
-        const newQuantity = currentQuantity - sellQuantity;
+      if (matchingRow) {
+        const currentQuantity = parseFloat(matchingRow.cells[1].textContent);
         const pricePerUnit =
           parseFloat(matchingRow.getAttribute("data-value")) / currentQuantity;
-        const newValue = pricePerUnit * newQuantity;
+        const newQuantity = currentQuantity - sellQuantity;
 
-        matchingRow.cells[1].textContent = newQuantity;
-        matchingRow.cells[2].textContent = `$${newValue.toFixed(2)}`;
-        matchingRow.setAttribute("data-value", newValue.toFixed(2));
+        if (newQuantity > 0) {
+          const newValue = newQuantity * pricePerUnit;
 
-        totalPortfolioValue -= pricePerUnit * sellQuantity;
+          matchingRow.cells[1].textContent = formatQuantity(newQuantity);
+          matchingRow.cells[2].textContent = `$${newValue.toFixed(2)}`;
+          matchingRow.setAttribute("data-value", newValue.toFixed(2));
+
+          totalPortfolioValue -= sellQuantity * pricePerUnit;
+        } else {
+          tableBody.removeChild(matchingRow);
+          totalPortfolioValue -= currentQuantity * pricePerUnit;
+        }
+
+        // Correct for negative zero
+        totalPortfolioValue =
+          Math.abs(totalPortfolioValue) < 1e-6 ? 0 : totalPortfolioValue;
+
+        totalProt.textContent = `${totalPortfolioValue.toFixed(2)}$`;
+        recordAction(
+          "Sell",
+          sellSymbol,
+          sellQuantity,
+          sellQuantity * pricePerUnit
+        );
+      } else {
+        alert("Stock symbol not found in the portfolio.");
       }
 
-      totalProt.textContent = `${totalPortfolioValue.toFixed(2)}$`;
+      document.getElementById("stockSymbolsell").value = "";
+      document.getElementById("stockQuantitysell").value = "";
     } else {
-      alert("Stock symbol not found in the portfolio.");
+      alert("Please enter a valid symbol and quantity for selling.");
     }
-
-    // Clear the input fields
-    document.getElementById("stockSymbolsell").value = "";
-    document.getElementById("stockQuantitysell").value = "";
   });
 
-  // Fetch symbols when the page loads
   fetchAllStockSymbols();
+
+  window.onbeforeunload = () => {
+    localStorage.setItem("stockSymbolInput", stockSymbolInput.value);
+    localStorage.setItem("stockQuantityInput", stockQuantityInput.value);
+    localStorage.setItem("allStockSymbols", JSON.stringify(allStockSymbols));
+    localStorage.setItem(
+      "totalPortfolioValue",
+      JSON.stringify(totalPortfolioValue)
+    );
+    localStorage.setItem("tableBody", tableBody.innerHTML);
+  };
+
+  window.onload = () => {
+    const savedStockSymbolInput = localStorage.getItem("stockSymbolInput");
+    if (savedStockSymbolInput !== null)
+      stockSymbolInput.value = savedStockSymbolInput;
+
+    const savedStockQuantityInput = localStorage.getItem("stockQuantityInput");
+    if (savedStockQuantityInput !== null)
+      stockQuantityInput.value = savedStockQuantityInput;
+
+    const savedAllStockSymbols = localStorage.getItem("allStockSymbols");
+    allStockSymbols = savedAllStockSymbols
+      ? JSON.parse(savedAllStockSymbols)
+      : [];
+
+    const savedTotalPortfolioValue = localStorage.getItem(
+      "totalPortfolioValue"
+    );
+    totalPortfolioValue = savedTotalPortfolioValue
+      ? JSON.parse(savedTotalPortfolioValue)
+      : 0;
+
+    const savedTableHTML = localStorage.getItem("tableBody");
+    if (savedTableHTML) tableBody.innerHTML = savedTableHTML;
+
+    totalProt.textContent = `${totalPortfolioValue.toFixed(2)}$`;
+  };
 });
