@@ -171,14 +171,9 @@ button:hover {
 
 /* Navbar Styles */
 .navbar {
-  width: 20%;
-  background-color: rgb(
-    255,
-    255,
-    255
-  ); /* Solid black background for contrast */
-  padding: 10px 0; /* Vertical padding */
-  box-shadow: 0 2px 5px rgb(0, 0, 0); /* Subtle shadow for depth */
+  /* ...existing styles... */
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 2px 5px rgb(0, 0, 0);
 }
 
 .navbar ul {
@@ -213,14 +208,31 @@ button:hover {
 }
 
 /* Responsive Design */
+/* ...other existing styles... */
+
+/* Responsive Design */
 @media screen and (max-width: 768px) {
+  .navbar {
+    width: 100%; /* Full width on smaller screens */
+    padding: 20px 0; /* Adjust padding */
+  }
+
   .navbar ul {
-    justify-content: center; /* Center items on smaller screens */
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align items to the start */
   }
 
   .navbar ul li {
-    margin-right: 15px; /* Reduce margin on smaller screens */
+    margin-right: 0; /* Remove horizontal margin */
+    margin-bottom: 15px; /* Add vertical spacing */
+  }
+
+  .navbar a {
+    font-size: 1.2em; /* Increase font size for readability */
+    padding: 10px 15px; /* Increase padding for a larger touch area */
+  }
+
+  .navbar ul li:last-child {
+    margin-bottom: 0; /* Remove margin for the last item */
   }
 }
-
-/* Additional styling for small screens or other elements can be added here */
