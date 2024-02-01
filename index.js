@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const stockQuantityInput = document.getElementById("stockQuantity");
   const resultArea = document.getElementById("resultArea");
   const totalProt = document.getElementById("totalProt");
-  const financialModelingPrepApiKey = "a5a85ae1c0230e052dd25b366c271d13";
+  const financialModelingPrepApiKey = "";
   let allStockSymbols = [];
   let totalPortfolioValue = 0;
 
